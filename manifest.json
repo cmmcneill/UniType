@@ -1,0 +1,16 @@
+{
+    "manifest_version": 2,
+    "name": "UniType",
+    "version": "1.0",
+    "description": "Type in cool unicode fonts anywhere and everywhere.",
+    "icons": {
+        "48": "icons/unitype_48.png",
+        "96": "icons/unitype_96.png"
+    },
+    "content_scripts": [
+        {
+            "matches": ["*://*/*"],
+            "js": ["unitype.js"]
+        }
+    ]
+}
