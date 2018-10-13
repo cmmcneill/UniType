@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2018 Craig McNeill. All rights reserved.
+ * Released under the MIT license (see LICENSE).
+ */
 (function() {
     let charMap = {
         ' ': ' ',

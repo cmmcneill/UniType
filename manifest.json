@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "UniType",
     "version": "1.0",
-    "description": "Type in cool unicode fonts anywhere and everywhere.",
+    "description": "Type in cool unicode fonts anywhere.",
     "icons": {
         "48": "icons/unitype_48.png",
         "96": "icons/unitype_96.png"
