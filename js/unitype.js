@@ -3,6 +3,7 @@
  * Released under the MIT license (see LICENSE).
  */
 (function() {
+    // Set up the keyboard -> unicode character map
     let charMap = {
         ' ': ' ',
         '!': '！',
@@ -100,13 +101,15 @@
         '}': '｝',
         '~': '～'
     };
+    let enabled = false;
+
+    // Listen for keypress events targeting text fields
     function unitype(e) {
+        if (!enabled) return;
         let tag = e.target;
         let tagName = tag.tagName;
-        console.log(tag);
         if (e.which && (tagName === 'INPUT' || tagName === 'TEXTAREA')) {
             let char = String.fromCharCode(e.which);
-            console.log(char);
             if (charMap.hasOwnProperty(char)) {
                 let start = tag.selectionStart, end = tag.selectionEnd, val = tag.value, newChar;
                 let lChar = start > 0 ? val.slice(start - 1, start) : false;
@@ -128,7 +131,6 @@
                 } else {
                     newChar = charMap[char];
                 }
-                console.log(char + ' => ' + newChar);
                 tag.value = val.slice(0, start) + newChar + val.slice(end);
                 tag.selectionStart = tag.selectionEnd = start + 1;
                 e.preventDefault();
@@ -137,4 +139,12 @@
         }
     }
     window.addEventListener('keypress', unitype);
+
+    // Listen for messages from the background control script
+    function handleMessage(msg) {
+        if (msg.hasOwnProperty('enabled')) {
+            enabled = msg.enabled;
+        }
+    }
+    browser.runtime.onMessage.addListener(handleMessage);
 })();
