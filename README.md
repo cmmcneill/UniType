@@ -1,4 +1,5 @@
 # UniType
-Browser extension for typing in unicode fonts.
+Browser extension that allows you to easily tpe in special unicode fonts on any site (which supports unicode).
 
+# Browser Compatibility
 Only FireFox is currently supported.

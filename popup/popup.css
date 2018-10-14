@@ -1,0 +1,26 @@
+body {
+    color: #333333;
+    width: 200px;
+}
+.content {
+    padding: 6px 0;
+}
+hr {
+    border-color: #eeeeee;
+}
+.btn {
+    background-color: #ffffff;
+    border: 1px solid #666666;
+    cursor: pointer;
+    padding: 4px 10px;
+    text-align: center;
+    margin: 2px 4px;
+    border-radius: 3px;
+}
+.btn:hover {
+    background-color: #dddddd;
+}
+.btn.on {
+    color: #ffffff;
+    background-color: #cf05e7;
+}
