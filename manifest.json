@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "author": "Craig McNeill",
     "description": "Type in cool unicode fonts anywhere.",
-    "homepage_url": "https://github.com/cmmcneill/unitype",
+    "homepage_url": "https://github.com/cmmcneill/UniType",
     "icons": {
         "48": "icons/unitype_48.png",
         "96": "icons/unitype_96.png"
