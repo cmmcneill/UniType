@@ -8,14 +8,18 @@ localStorage.enabled = 0;
 localStorage.font = 'fullWidth';
 
 // Listen for enabled/font update messages from the popup, and state requests from content scripts
-browser.runtime.onMessage.addListener(function(msg) {
+chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
     if (msg.action === 'updateEnabled') {
         updateEnabled();
     } else if (msg.action === 'updateFont') {
         updateFont();
+    } else if (msg.action === 'updateCombos') {
+        updateCombos();
     } else if (msg.action === 'getState') {
-        return new Promise(function(resolve) {
-            resolve({enabled: localStorage.enabled == 1, font: localStorage.font});
+        sendResponse({
+            enabled: localStorage.enabled == 1,
+            font: localStorage.font,
+            combos: localStorage.combos == 1
         });
     }
 });
@@ -37,8 +41,8 @@ function updateEnabled() {
         };
         title = 'UniType is OFF';
     }
-    browser.browserAction.setIcon({path: path});
-    browser.browserAction.setTitle({title: title});
+    chrome.browserAction.setIcon({path: path});
+    chrome.browserAction.setTitle({title: title});
 
     // Enable/disable the content scripts
     sendMessageToAllTabs({enabled: localStorage.enabled == 1});
@@ -49,11 +53,18 @@ function updateFont() {
     sendMessageToAllTabs({font: localStorage.font});
 }
 
+// Update the special combination status
+function updateCombos() {
+    sendMessageToAllTabs({combos: localStorage.combos == 1});
+}
+
 // Sends a message to all tabs in any window
 function sendMessageToAllTabs(msg) {
-    browser.tabs.query({}).then(function(tabs) {
+    chrome.tabs.query({}, function(tabs) {
         for (let tab of tabs) {
-            browser.tabs.sendMessage(tab.id, msg).catch(function() {});
+            chrome.tabs.sendMessage(tab.id, msg, function() {
+                chrome.runtime.lastError;
+            });
         }
     });
 }

@@ -5,21 +5,26 @@
 
 (function() {
     // Ask the background script for the current settings
-    let enabled, font;
-    browser.runtime.sendMessage({action: 'getState'}).then(function(msg) {
+    let unitypeEnabled, currentFont, combosEnabled;
+    chrome.runtime.sendMessage({action: 'getState'}, function(res) {
         // Set the enabled status and current font using the response
-        enabled = msg.enabled;
-        font = msg.font;
+        if (chrome.runtime.lastError) {
+            console.log(chrome.runtime.lastError);
+        } else {
+            unitypeEnabled = res.enabled;
+            currentFont = res.font;
+            combosEnabled = res.combos;
+        }
     });
 
     // Listen for keypress events targeting text fields
     function unitype(e) {
-        if (!enabled || e.ctrlKey || e.metaKey || e.altKey) return;
+        if (!unitypeEnabled || e.ctrlKey || e.metaKey || e.altKey) return;
         let tag = e.target;
         let tagName = tag.tagName;
         if (e.which && (tagName === 'INPUT' || tagName === 'TEXTAREA')) {
             let char = String.fromCharCode(e.which);
-            let map = unitypeFonts[font];
+            let map = unitypeFonts[currentFont];
             if (map.hasOwnProperty(char)) {
                 let start = tag.selectionStart;
                 let end = tag.selectionEnd;
@@ -46,7 +51,7 @@
 
     // Check for special character combos and resolve them
     function checkCombo(char, map, val, start, end) {
-        if (!map.hasOwnProperty('combo')) return false;
+        if (!combosEnabled || !map.hasOwnProperty('combo')) return false;
         let newChar;
         for (let seq in map.combo) {
             let found = false;
@@ -91,11 +96,14 @@
     // Listen for messages from the background control script
     function handleMessage(msg) {
         if (msg.hasOwnProperty('enabled')) {
-            enabled = msg.enabled;
+            unitypeEnabled = msg.enabled;
         }
         if (msg.hasOwnProperty('font')) {
-            font = msg.font;
+            currentFont = msg.font;
+        }
+        if (msg.hasOwnProperty('combos')) {
+            combosEnabled = msg.combos;
         }
     }
-    browser.runtime.onMessage.addListener(handleMessage);
+    chrome.runtime.onMessage.addListener(handleMessage);
 })();

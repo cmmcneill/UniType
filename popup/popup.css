@@ -16,6 +16,7 @@ hr {
     text-align: center;
     margin: 2px 4px;
     border-radius: 3px;
+    line-height: 1.25;
 }
 .btn:hover {
     background-color: #dddddd;

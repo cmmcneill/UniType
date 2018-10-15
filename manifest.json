@@ -14,7 +14,7 @@
             "matches": ["*://*/*"],
             "js": [
                 "scripts/fonts.js",
-                "scripts/unitype.js"
+                "scripts/content.js"
             ]
         }
     ],
