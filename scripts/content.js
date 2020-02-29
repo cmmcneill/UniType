@@ -9,7 +9,7 @@
     chrome.runtime.sendMessage({action: 'getState'}, function(res) {
         // Set the enabled status and current font using the response
         if (chrome.runtime.lastError) {
-            console.log(chrome.runtime.lastError);
+            console.error(chrome.runtime.lastError);
         } else {
             unitypeEnabled = res.enabled;
             currentFont = res.font;
@@ -22,15 +22,29 @@
         if (!unitypeEnabled || e.ctrlKey || e.metaKey || e.altKey) return;
         let tag = e.target;
         let tagName = tag.tagName;
-        if (e.which && (tagName === 'INPUT' || tagName === 'TEXTAREA')) {
+        if (e.which && (tagName === 'INPUT' || tagName === 'TEXTAREA' || tag.isContentEditable)) {
             let char = String.fromCharCode(e.which);
             let map = unitypeFonts[currentFont];
             if (map.hasOwnProperty(char)) {
-                let start = tag.selectionStart;
-                let end = tag.selectionEnd;
-                let val = tag.value
-                let newChar;
-
+                // Get the selection start and end positions within the text of the element
+                let start, end, val, newChar, sel, range;
+                if (tag.isContentEditable) {
+                    sel = window.getSelection();
+                    if (!sel.rangeCount) return;
+                    range = sel.getRangeAt(0);
+                    let temp = range.cloneRange();
+                    temp.setStart(tag, 0);
+                    end = temp.toString().length;
+                    temp.setEnd(range.startContainer, range.startOffset);
+                    start = temp.toString().length;
+                    temp.detach();
+                    val = tag.textContent;
+                } else {
+                    start = tag.selectionStart;
+                    end = tag.selectionEnd;
+                    val = tag.value;
+                }
+                
                 // Check if this font has special combinations
                 let combo = checkCombo(char, map, val, start, end);
                 if (combo) {
@@ -40,8 +54,27 @@
                 } else {
                     newChar = map[char];
                 }
-                tag.value = val.slice(0, start) + newChar + val.slice(end);
-                tag.selectionStart = tag.selectionEnd = start + newChar.length;
+
+                // Replace the selection with the special character(s)
+                if (tag.isContentEditable) {
+                    if (combo) {
+                        // Modify the current selection to include the adjacent combo chars
+                        let rel = getRelativeOffset(tag, start);
+                        range.setStart(rel.node, rel.offset);
+                        rel = getRelativeOffset(tag, end);
+                        range.setEnd(rel.node, rel.offset);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                    document.execCommand('insertText', false, newChar);
+                } else {
+                    tag.value = val.slice(0, start) + newChar + val.slice(end);
+                    tag.selectionStart = tag.selectionEnd = start + newChar.length;
+                }
+
+                // Trigger an input event on the control
+                tag.dispatchEvent(new Event('input', {bubbles: true}));
+
                 e.preventDefault();
                 return false;
             }
@@ -91,6 +124,29 @@
             }
         }
         return false;
+    }
+
+    // Translate an absolute selection offset into one relative to a text node
+    function getRelativeOffset(container, offset, sub = false) {
+        for (let node of container.childNodes) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                let len = node.textContent.length;
+                if (offset <= len) {
+                    return {node, offset};
+                }
+                offset -= len;
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                let rel = getRelativeOffset(node, offset, true);
+                if (rel.node) {
+                    return rel;
+                }
+                offset = rel.offset;
+            }
+        }
+        if (sub) {
+            return {node: false, offset};
+        }
+        return {node: container, offset: 0};
     }
 
     // Listen for messages from the background control script

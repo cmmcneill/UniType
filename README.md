@@ -7,3 +7,8 @@ UniType is a browser extension that allows you to easily type in special unicode
 - Edge: Not tested
 - Opera: Not tested
 - Safari: Not tested
+
+# Changelog
+- 1.1.0
+  - Added support for `contenteditable` elements
+  - Fixed buggy behaviour with certain frameworks/websites
